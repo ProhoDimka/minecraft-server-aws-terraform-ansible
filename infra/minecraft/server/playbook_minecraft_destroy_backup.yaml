@@ -1,0 +1,23 @@
+- hosts: server
+  tasks:
+    - name: Copy script files
+      ansible.builtin.copy:
+        src: scripts/
+        dest: /home/ubuntu/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0740'
+    - name: Execute the backup command in remote host
+      shell: ./3_backup_server.sh > 3_backup_server.log 2>&1
+      become: yes
+      become_user: ubuntu
+      async: 1200
+      poll: 20
+      args:
+        chdir: $HOME
+        executable: /usr/bin/bash
+    - name: Backup saves
+      ansible.builtin.fetch:
+        src: /home/ubuntu/.minecraft_server/saves.tar.gz
+        dest: saves_backup/
+        flat: yes

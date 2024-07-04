@@ -1,0 +1,34 @@
+- hosts: server
+  tasks:
+    - name: Copy saves.tar.gz to the server
+      ansible.builtin.copy:
+        src: saves.tar.gz
+        dest: /home/ubuntu/.minecraft_server/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0740'
+    - name: Copy scripts to the server
+      ansible.builtin.copy:
+        src: scripts/
+        dest: /home/ubuntu/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0740'
+    - name: Execute install java script
+      shell: ./1_install_java.sh > 1_install_java.log 2>&1
+      become: yes
+      become_user: ubuntu
+      async: 1200
+      poll: 20
+      args:
+        chdir: $HOME
+        executable: /usr/bin/bash
+    - name: Execute start server script
+      shell: ./2_launch_server.sh > 2_launch_server.log 2>&1
+      become: yes
+      become_user: ubuntu
+      async: 1200
+      poll: 20
+      args:
+        chdir: $HOME
+        executable: /usr/bin/bash
